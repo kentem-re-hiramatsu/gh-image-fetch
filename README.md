@@ -140,6 +140,25 @@ public リポジトリの実際の添付 URL で動作確認します。
    gh image-fetch download "<コピーしたURL>" ../evil.png
    ```
 
+## Claude Code から使う(スキル配布)
+
+[skills/fetch-issue-images/](skills/fetch-issue-images/) に、Claude Code 用のスキル
+(issue / PR の添付画像を自動でダウンロードして確認する手順書)を同梱しています。
+
+自分の環境にコピーすると、どのリポジトリで作業していても
+「この issue のスクリーンショットを見て」のような依頼で Claude が自動的にこのツールを使うようになります:
+
+```sh
+# ユーザーレベル(全プロジェクトで有効)
+mkdir -p ~/.claude/skills
+cp -r skills/fetch-issue-images ~/.claude/skills/
+
+# または特定プロジェクトのみ(チームで共有する場合はこちらをコミット)
+cp -r skills/fetch-issue-images <プロジェクト>/.claude/skills/
+```
+
+前提として `gh extension install kentem-re-hiramatsu/gh-image-fetch` が必要です。
+
 ## 開発
 
 ```sh
