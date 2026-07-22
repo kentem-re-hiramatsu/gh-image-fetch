@@ -29,41 +29,56 @@ go build -o gh-image-fetch.exe .   # macOS/Linux は -o gh-image-fetch
 gh extension install .
 ```
 
-## 使い方
+## 使い方(基本の3ステップ)
 
-```sh
-# URL 全体を指定してファイルパスに保存
-gh image-fetch download https://github.com/user-attachments/assets/<uuid> ./screenshot.png
+### ① 画像の URL をコピーする
 
-# UUID のみ指定
-gh image-fetch download <uuid> ./screenshot.png
+GitHub の issue / PR を開き、本文に貼られている画像を右クリック →「画像アドレスをコピー」。
+次のような URL が取れます:
 
-# 保存先に既存ディレクトリを指定すると、<uuid> + Content-Type から推測した拡張子で保存される
-gh image-fetch download <uuid> ./images/
-
-# 保存先を省略すると、デフォルト保存フォルダー(下記参照)に保存される
-gh image-fetch download <uuid>
+```
+https://github.com/user-attachments/assets/27ecac64-b73f-4ad7-ac47-a4071db12c76
 ```
 
+### ② 最初に1回だけ、デフォルト保存フォルダーを設定する
+
+```sh
+gh image-fetch config set dir C:\Users\me\Pictures\gh-attachments
+```
+
+フォルダーが無ければダウンロード時に自動作成されます。設定内容は
+`gh image-fetch config get dir` で確認できます。
+
+### ③ ダウンロードする
+
+```sh
+gh image-fetch download "<コピーした画像のURL>"
+```
+
+②のフォルダーに `<日時>-<ID先頭8桁><拡張子>`(例: `20260722-093015-27ecac64.png`)という
+名前で保存されます。時系列で並び、連続ダウンロードでも名前が衝突しません。
+
+## 応用: 保存先をその場で指定する
+
+第2引数に保存先を渡すと、そのときだけデフォルトフォルダー以外に保存できます。
+
+```sh
+# ファイルパスを指定 → その名前で保存
+gh image-fetch download "<画像のURL>" ./screenshot.png
+
+# 既存ディレクトリを指定 → その中に <ID> + 推測した拡張子で保存
+gh image-fetch download "<画像のURL>" ./images/
+```
+
+- URL の代わりに、URL 末尾の ID 部分(UUID)だけを渡すこともできます(例: `gh image-fetch download 27ecac64-b73f-4ad7-ac47-a4071db12c76`)。
 - 保存先に同名ファイルがある場合は**上書き**されます。
 - `..` を含む保存先パスはパストラバーサル対策のため拒否されます。
 
-## デフォルト保存フォルダー
-
-保存先(`[dest]`)を省略した場合の保存先フォルダーを設定できます。
-
-```sh
-# 設定する(フォルダーが無ければダウンロード時に自動作成される)
-gh image-fetch config set dir C:\Users\me\Pictures\gh-attachments
-
-# 現在の設定を確認する
-gh image-fetch config get dir
-```
+## デフォルト保存フォルダーの詳細
 
 - 設定は `%AppData%\gh-image-fetch\config.json`(OS の標準設定ディレクトリ)に保存されます。認証情報は保存しません。
 - 環境変数 **`GH_IMAGE_FETCH_DIR`** が設定されている場合はそちらが**優先**されます(一時的な切り替えや CI 用)。
-- 省略時のファイル名は `<日時>-<uuid先頭8桁><拡張子>` です(例: `20260722-093015-27ecac64.png`)。時系列で並び、連続ダウンロードでも衝突しません。
-- どちらも未設定のまま保存先を省略するとエラーになり、設定方法が案内されます。
+- 未設定のまま保存先を省略するとエラーになり、設定方法が案内されます。
 
 ## エラーメッセージ
 
