@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/re-hiramatsu/gh-image-fetch/cmd"
+	"github.com/kentem-re-hiramatsu/gh-image-fetch/cmd"
 )
 
 func main() {

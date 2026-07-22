@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/re-hiramatsu/gh-image-fetch/internal/attachment"
+	"github.com/kentem-re-hiramatsu/gh-image-fetch/internal/attachment"
 	"github.com/spf13/cobra"
 )
 

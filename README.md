@@ -14,13 +14,13 @@ gh CLI 自身の認証(`GH_TOKEN` / `GH_HOST` 環境変数、または `gh auth 
 ## インストール
 
 ```sh
-gh extension install re-hiramatsu/gh-image-fetch
+gh extension install kentem-re-hiramatsu/gh-image-fetch
 ```
 
 ソースからインストールする場合(要 Go 1.26+):
 
 ```sh
-git clone https://github.com/re-hiramatsu/gh-image-fetch
+git clone https://github.com/kentem-re-hiramatsu/gh-image-fetch
 cd gh-image-fetch
 gh extension install .
 ```
@@ -46,15 +46,14 @@ gh image-fetch download <uuid> ./images/
 | 状況 | 表示 |
 | --- | --- |
 | gh 未認証 / トークン期限切れ | `gh auth login` での再認証を案内 |
-| アセットが存在しない (404) | private リポジトリの添付はトークンで取得できない場合がある旨を案内 |
+| アセットが存在しない / アクセス権なし (404) | アセット不存在またはリポジトリへのアクセス権不足の可能性を案内 |
 | レート制限 (403/429) | リトライ時期を案内 |
 
 ## private リポジトリの添付について
 
-`user-attachments` の URL は REST API のエンドポイントではなく github.com 上の配信 URL です。
-public リポジトリの添付は問題なく取得できますが、**private リポジトリの添付がトークンで
-取得できるかは GitHub 側の仕様に依存します**(ブラウザセッションが必要という報告もあります)。
-404 になる場合はブラウザでダウンロードしてください。
+public / private どちらのリポジトリの添付も取得できます(private は実環境で動作確認済み)。
+ただし private の添付を取得するには、gh のトークンが対象リポジトリへのアクセス権を
+持っている必要があります。権限がない場合は 404 が返ります。
 
 ## 手動テスト手順
 

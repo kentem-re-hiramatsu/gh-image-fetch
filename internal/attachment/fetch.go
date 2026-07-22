@@ -71,7 +71,7 @@ func Fetch(asset Asset) (*Result, error) {
 		return nil, fmt.Errorf("access denied (HTTP 403): your account does not have permission to access this asset")
 	case resp.StatusCode == http.StatusNotFound:
 		resp.Body.Close()
-		return nil, fmt.Errorf("asset not found (HTTP 404): the asset does not exist, or it belongs to a private repository whose attachments cannot be fetched with a token (try downloading it in a browser)")
+		return nil, fmt.Errorf("asset not found (HTTP 404): the asset does not exist, or your gh account does not have access to the repository it belongs to (check with `gh auth status`)")
 	default:
 		resp.Body.Close()
 		return nil, fmt.Errorf("unexpected response from GitHub: HTTP %d", resp.StatusCode)

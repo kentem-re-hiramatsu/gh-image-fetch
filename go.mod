@@ -1,4 +1,4 @@
-module github.com/re-hiramatsu/gh-image-fetch
+module github.com/kentem-re-hiramatsu/gh-image-fetch
 
 go 1.26
 
