@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/cli/go-gh/v2/pkg/api"
@@ -12,6 +13,10 @@ import (
 // maxRedirects bounds how many unauthenticated redirect hops we follow
 // after the initial authenticated request.
 const maxRedirects = 5
+
+// requestTimeout bounds each HTTP request so a stalled server cannot hang
+// the command forever.
+const requestTimeout = 60 * time.Second
 
 // Result is a successfully opened download stream.
 // Callers must Close the Body.
@@ -27,7 +32,7 @@ type Result struct {
 // unauthenticated client so the token never leaks to third-party hosts
 // (signed redirect URLs carry their own short-lived credentials).
 func Fetch(asset Asset) (*Result, error) {
-	client, err := api.NewHTTPClient(api.ClientOptions{Host: asset.Host})
+	client, err := api.NewHTTPClient(api.ClientOptions{Host: asset.Host, Timeout: requestTimeout})
 	if err != nil {
 		return nil, fmt.Errorf("gh authentication is not configured: run `gh auth login` first (%w)", err)
 	}
@@ -79,10 +84,26 @@ func Fetch(asset Asset) (*Result, error) {
 }
 
 // followRedirect fetches a redirect target with a client that sends no
-// GitHub credentials and follows any further redirects normally.
+// GitHub credentials. Every hop must be https so the asset is never
+// downloaded over plaintext.
 func followRedirect(location string) (*http.Response, error) {
-	client := &http.Client{Timeout: 60 * time.Second}
-	resp, err := client.Get(location)
+	u, err := url.Parse(location)
+	if err != nil || u.Scheme != "https" {
+		return nil, fmt.Errorf("refusing to follow non-https redirect to %q", location)
+	}
+	client := &http.Client{
+		Timeout: requestTimeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= maxRedirects {
+				return fmt.Errorf("too many redirects")
+			}
+			if req.URL.Scheme != "https" {
+				return fmt.Errorf("refusing to follow non-https redirect to %q", req.URL)
+			}
+			return nil
+		},
+	}
+	resp, err := client.Get(u.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to download from storage: %w", err)
 	}
