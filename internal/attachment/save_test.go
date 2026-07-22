@@ -62,6 +62,11 @@ func TestExtensionFor(t *testing.T) {
 		"application/pdf":          ".pdf",
 		"":                         ".bin",
 		"garbage":                  ".bin",
+		// Never trust extensions outside the allowlist: these must not
+		// become .html / .exe / .js.
+		"text/html":                ".bin",
+		"application/x-msdownload": ".bin",
+		"text/javascript":          ".bin",
 	}
 	for ct, want := range tests {
 		if got := extensionFor(ct); got != want {
@@ -79,6 +84,25 @@ func TestDefaultFileName(t *testing.T) {
 	}
 	if got := DefaultFileName(now, "short", ""); got != "20260722-093015-short.bin" {
 		t.Fatalf("DefaultFileName short id = %q", got)
+	}
+}
+
+func TestSaveRejectsOversizedDownload(t *testing.T) {
+	old := maxDownloadBytes
+	maxDownloadBytes = 10
+	defer func() { maxDownloadBytes = old }()
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "big.bin")
+	if _, err := Save(path, strings.NewReader("0123456789ABC")); err == nil {
+		t.Fatal("Save succeeded, want size-limit error")
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("oversized file was left on disk: %v", err)
+	}
+
+	if n, err := Save(path, strings.NewReader("0123456789")); err != nil || n != 10 {
+		t.Fatalf("Save at exactly the limit = (%d, %v), want (10, nil)", n, err)
 	}
 }
 

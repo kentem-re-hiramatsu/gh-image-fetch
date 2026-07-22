@@ -73,6 +73,8 @@ gh image-fetch download "<画像のURL>" ./images/
 - URL の代わりに、URL 末尾の ID 部分(UUID)だけを渡すこともできます(例: `gh image-fetch download 27ecac64-b73f-4ad7-ac47-a4071db12c76`)。
 - 保存先に同名ファイルがある場合は**上書き**されます。
 - `..` を含む保存先パスはパストラバーサル対策のため拒否されます。
+- 拡張子の自動判定は既知の安全なタイプ(png/jpg/gif/webp/svg/mp4/mov/pdf/txt)のみで、それ以外は `.bin` になります。
+- 256MB を超えるアセットは安全のためダウンロードを中止します。
 
 ## デフォルト保存フォルダーの詳細
 

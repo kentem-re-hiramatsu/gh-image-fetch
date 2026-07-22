@@ -10,8 +10,14 @@ import (
 	"time"
 )
 
-// preferredExts maps common attachment content types to conventional
-// extensions; mime.ExtensionsByType is the fallback.
+// maxDownloadBytes caps a single download. GitHub user-attachments are at
+// most ~100 MB, so anything larger is unexpected. A var so tests can
+// override it.
+var maxDownloadBytes int64 = 256 << 20
+
+// preferredExts is the allowlist of content types whose extension we trust.
+// Anything else is saved as .bin so a hostile Content-Type can never yield
+// an executable or browser-runnable extension (.exe, .html, .js, ...).
 var preferredExts = map[string]string{
 	"image/png":     ".png",
 	"image/jpeg":    ".jpg",
@@ -63,12 +69,16 @@ func DefaultFileName(now time.Time, assetID, contentType string) string {
 }
 
 // Save writes the stream to path, overwriting any existing file.
+// Downloads larger than maxDownloadBytes are aborted and removed.
 func Save(path string, body io.Reader) (int64, error) {
 	f, err := os.Create(path)
 	if err != nil {
 		return 0, fmt.Errorf("cannot create %q: %w", path, err)
 	}
-	n, err := io.Copy(f, body)
+	n, err := io.Copy(f, io.LimitReader(body, maxDownloadBytes+1))
+	if err == nil && n > maxDownloadBytes {
+		err = fmt.Errorf("asset is larger than the %d MB limit", maxDownloadBytes>>20)
+	}
 	if cerr := f.Close(); err == nil {
 		err = cerr
 	}
@@ -86,9 +96,6 @@ func extensionFor(contentType string) string {
 	}
 	if ext, ok := preferredExts[mediaType]; ok {
 		return ext
-	}
-	if exts, err := mime.ExtensionsByType(mediaType); err == nil && len(exts) > 0 {
-		return exts[0]
 	}
 	return ".bin"
 }
