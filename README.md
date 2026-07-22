@@ -17,11 +17,15 @@ gh CLI 自身の認証(`GH_TOKEN` / `GH_HOST` 環境変数、または `gh auth 
 gh extension install kentem-re-hiramatsu/gh-image-fetch
 ```
 
+リリースバイナリは、`v*` タグの push を契機に GitHub Actions
+([cli/gh-extension-precompile](https://github.com/cli/gh-extension-precompile))が自動生成します。
+
 ソースからインストールする場合(要 Go 1.26+):
 
 ```sh
 git clone https://github.com/kentem-re-hiramatsu/gh-image-fetch
 cd gh-image-fetch
+go build -o gh-image-fetch.exe .   # macOS/Linux は -o gh-image-fetch
 gh extension install .
 ```
 
