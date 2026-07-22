@@ -95,6 +95,11 @@ func load() (file, error) {
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return cfg, fmt.Errorf("config file %q is corrupted: %w", path, err)
 	}
+	if cfg.Dir != "" {
+		if err := validateDir(cfg.Dir); err != nil {
+			return file{}, fmt.Errorf("config file %q has an invalid dir: %w", path, err)
+		}
+	}
 	return cfg, nil
 }
 
