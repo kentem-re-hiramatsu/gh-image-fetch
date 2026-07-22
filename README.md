@@ -77,7 +77,22 @@ gh image-fetch download "<画像のURL>" ./images/
 ## デフォルト保存フォルダーの詳細
 
 - 設定は `%AppData%\gh-image-fetch\config.json`(OS の標準設定ディレクトリ)に保存されます。認証情報は保存しません。
-- 環境変数 **`GH_IMAGE_FETCH_DIR`** が設定されている場合はそちらが**優先**されます(一時的な切り替えや CI 用)。
+- 環境変数 **`GH_IMAGE_FETCH_DIR`** が設定されている場合はそちらが**優先**されます(一時的な切り替えや CI 用)。設定例:
+
+  ```powershell
+  # Windows で永続的に設定(ユーザー環境変数。新しいターミナルから有効)
+  setx GH_IMAGE_FETCH_DIR "C:\Users\me\Pictures\gh-attachments"
+
+  # PowerShell のセッション中だけ一時的に使う
+  $env:GH_IMAGE_FETCH_DIR = "C:\temp\issue-1380"
+  ```
+
+  ```sh
+  # Git Bash / macOS / Linux で1コマンドだけ切り替える
+  GH_IMAGE_FETCH_DIR=/tmp/issue-1380 gh image-fetch download "<画像のURL>"
+  ```
+
+  普段使いには `config set dir`(1回設定すれば永続)で十分で、環境変数は不要です。
 - 未設定のまま保存先を省略するとエラーになり、設定方法が案内されます。
 
 ## エラーメッセージ
