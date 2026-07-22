@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestResolveDestRejectsTraversal(t *testing.T) {
@@ -66,6 +67,18 @@ func TestExtensionFor(t *testing.T) {
 		if got := extensionFor(ct); got != want {
 			t.Errorf("extensionFor(%q) = %q, want %q", ct, got, want)
 		}
+	}
+}
+
+func TestDefaultFileName(t *testing.T) {
+	now := time.Date(2026, 7, 22, 9, 30, 15, 0, time.Local)
+	got := DefaultFileName(now, "27ecac64-b73f-4ad7-ac47-a4071db12c76", "image/png")
+	want := "20260722-093015-27ecac64.png"
+	if got != want {
+		t.Fatalf("DefaultFileName = %q, want %q", got, want)
+	}
+	if got := DefaultFileName(now, "short", ""); got != "20260722-093015-short.bin" {
+		t.Fatalf("DefaultFileName short id = %q", got)
 	}
 }
 

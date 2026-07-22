@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // preferredExts maps common attachment content types to conventional
@@ -49,6 +50,16 @@ func ResolveDest(dest, assetID, contentType string) (string, error) {
 		return "", fmt.Errorf("parent directory %q does not exist", parent)
 	}
 	return dest, nil
+}
+
+// DefaultFileName names a file saved into the configured default directory:
+// <yyyymmdd-hhmmss>-<first 8 chars of the asset ID><ext>.
+func DefaultFileName(now time.Time, assetID, contentType string) string {
+	short := assetID
+	if len(short) > 8 {
+		short = short[:8]
+	}
+	return now.Format("20060102-150405") + "-" + short + extensionFor(contentType)
 }
 
 // Save writes the stream to path, overwriting any existing file.

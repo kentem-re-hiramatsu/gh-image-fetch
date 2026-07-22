@@ -36,10 +36,30 @@ gh image-fetch download <uuid> ./screenshot.png
 
 # 保存先に既存ディレクトリを指定すると、<uuid> + Content-Type から推測した拡張子で保存される
 gh image-fetch download <uuid> ./images/
+
+# 保存先を省略すると、デフォルト保存フォルダー(下記参照)に保存される
+gh image-fetch download <uuid>
 ```
 
 - 保存先に同名ファイルがある場合は**上書き**されます。
 - `..` を含む保存先パスはパストラバーサル対策のため拒否されます。
+
+## デフォルト保存フォルダー
+
+保存先(`[dest]`)を省略した場合の保存先フォルダーを設定できます。
+
+```sh
+# 設定する(フォルダーが無ければダウンロード時に自動作成される)
+gh image-fetch config set dir C:\Users\me\Pictures\gh-attachments
+
+# 現在の設定を確認する
+gh image-fetch config get dir
+```
+
+- 設定は `%AppData%\gh-image-fetch\config.json`(OS の標準設定ディレクトリ)に保存されます。認証情報は保存しません。
+- 環境変数 **`GH_IMAGE_FETCH_DIR`** が設定されている場合はそちらが**優先**されます(一時的な切り替えや CI 用)。
+- 省略時のファイル名は `<日時>-<uuid先頭8桁><拡張子>` です(例: `20260722-093015-27ecac64.png`)。時系列で並び、連続ダウンロードでも衝突しません。
+- どちらも未設定のまま保存先を省略するとエラーになり、設定方法が案内されます。
 
 ## エラーメッセージ
 
@@ -79,7 +99,16 @@ public リポジトリの実際の添付 URL で動作確認します。
    ```
 
    `./out/<uuid>.png` (拡張子は Content-Type による) が生成されることを確認する。
-6. エラー系の確認:
+6. デフォルト保存フォルダーの動作確認:
+
+   ```sh
+   gh image-fetch config set dir ./default-out
+   gh image-fetch download "<コピーしたURL>"
+   ```
+
+   `./default-out/<日時>-<uuid先頭8桁>.png` が生成されることを確認する。
+
+7. エラー系の確認:
 
    ```sh
    # 存在しない UUID → 404 メッセージ
